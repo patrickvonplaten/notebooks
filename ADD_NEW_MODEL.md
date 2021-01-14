@@ -1,13 +1,36 @@
 # How to add [<name of model>] to 🤗Transformers
+	
+Teacher: <name of hugging face teacher>
+	
+Begin: <start date>
+	
+Estimated time: <end date>
+
+The following sections explain in detail how to add <name of model> 
+to 🤗Transformers. You will work closely with <name of hugging face teacher> to
+integrate <name of model> into 🤗Transformers. By doing so, you will both gain a 
+theoratical and deep practical understanding of <name of model>. But more importantly, 
+you will have made a major open-source contribution to 🤗Transformers. Along the way,
+you will:
+	
+- get insights into open-source best practices, 
+- understand the design principles of one of the most popular NLP libraries,
+- learn how to do efficiently test large NLP models,
+- learn how to integrate python utilities like `black`, `isort`, `make fix-copies` into a library 
+  to always ensure clean and readable code.
+
+To begin with, you should start by getter a good understanding of the model.
   
-## Start by reading the paper
+## Theoritacl aspects of <name of model>
   
+### Paper
+
   You should take some time to read [<name of model>'s paper](<link to paper>).
   There might be large sections of the paper that are difficult to understand.
   If this is the case, this is totally fine - don't worry! The goal is not to get 
   a deep theoretical understanding of the paper, but to extract the necessary information 
   required to effectively reimplement the model to 🤗Transformers.
-  That being said, you don't have to spend too much time on the theoretical aspects of the <name of model>,
+  That being said, you don't have to spend too much time on the theoretical aspects,
   but rather focus on the practical ones, namely:
   
   - What time of model is <name of model>? BERT-like encoder-only model? GPT2-like decoder-only model? BART-like encoder-decoder model?
@@ -15,9 +38,30 @@
   - What is the novel feature of the model making it different to BERT, RoBERTa, or BART?
   - Which of the already existing [🤗Transformers models](https://huggingface.co/transformers/#contents) is most similar to <name of model>?
   
- After you feel like you have a good overview of the architecture of the 
-  
+ After you feel like you have gotten a good overview over the architecture of the model, you might want 
+ to ping <name of hugging face teacher> for any questions you might have.
+ This might include questions regarding the model's architecture, its attention layer, etc. <name of hugging face teacher> will be more 
+ than happy to help you.
  
+### Additional resources
+
+ Before diving into the code, here are some additional resources that might be worth taking a look at:
+ 
+ - <link 1>
+ - <link 2>
+ - <link 3>
+ - ...
+ 
+### Make sure you've understood the fundamental aspects of <name of model>
+ 
+Alright, now you should be ready to take a closer look into the actualy code of <name of model>.
+You should have understood the following aspects of <name of model> by now:
+
+- <characteristic 1 of name of model>
+- <characteristic 2 of name of model>
+- ...
+
+If any of the mentioned aspects above are **not** clear to you, now is a great time to talk to <name of hugging face teacher> again!
 
 ## Next prepare your environment
 
@@ -61,7 +105,94 @@ This creates a copy of the code under your GitHub user account.
 
 Now you have set up a development environment to port <name of model> to 🤗Transformers.
   
-## 
+## Run a pre-trained checkpoint using the original repository
+
+At first, you will work the original repository. Often, the original implementation is very
+ "researchy" meaning that documentation might be lacking and the code can be hard to read / understand.
+But this should be exactly your motivation to reimplement <name of the model>. At Hugging Face, one of our main goals is to
+*make people stand on the shoulders of giants* which translates here very well into taking a working 
+model and rewriting it to make it as **accesable, user-friendly, and beautiful** as possible.
+This is the #1 motivation to reimplement models into 🤗Transformers - trying to maximize access 
+to a complex new NLP technology for **everybody**.
+	
+You should start thereby by diving into the original repository.
+
+### Get familiar with the original repository.
+
+Succesfully running the official pre-trained model in the original repository is often 
+**the most difficult** step. From our experience, it is very important to spend some time to 
+get familiar with the [original codebase](<link to original repo>). You should find out
+
+- Where to find the pre-trained weights
+- How to load the pre-trained weights into its corresponding model
+- Trace one forward pass so that you know which classes and functions are required for a simple forward pass
+  . Usually, you only have to reimplement those functions.
+- Be able to locate the important components of the model: Where is the model class? Are there submodel 
+  classes, *e.g.* EncoderModel, DecoderModel? Where is the self-attention layer? 
+  Are there multiple different attention layers, *e.g.* *self-attention*, *cross-attention*...?
+- How can you debug the model in the original environment of the repo? Do you have to set `print` statements
+  or can you work with an interactive debugger like `ipdb`?
+  
+It is very important that before you start opening a PR in 🤗Transformers that you are able to **efficiently** 
+debug code in the original repository! This means that you should be able to run a forward pass and print out the 
+actual values of the output of a layer. *I.e* you are able to load a pre-trained model, pass an input vector of 
+token ids, *i.e.* `input_ids = [0, 1, 4, 5, ...]` to the model's forward function and you are able to print out the 
+intermediate outputs of - let's say - the first self-attention layer that could look something like this: 
+
+```bash
+[[[0.3427, 0.4756, ...], [-3.544, 0.3379, ...], ...], ...]
+```
+
+This means that your debugging environment should consists of a short script (ideally written by you) that 
+does the following (in pseudocode):
+
+```bash
+model = <name of model>Model.load_pretrained_checkpoint(/path/to/checkpoint/)
+input_ids = ... # vector of input ids
+outputs = model.predict(input_ids)
+```
+
+By running such a script, you should be able to print out intermediate values or hit a break point
+in the clone of the original repository that is saved locally on your computer.
+
+We expect that every model addded to 🤗Transformers passes a couple of integration tests, meaning that the original 
+model and the reimplemented version in 🤗Transformers have to give the exact same output up to a precision of 0.001! 
+It is not enough if the model gives nearly the same output, they have to be the same. Therefore, you will 
+certainly compare the intermediate outputs of the 🤗Transformers version multiple times against the intermediate outputs 
+of the original implementation of <name of model> in which case an **effecient** debugging environment of the original 
+repository is absolute key. Here is some advice is to make your debugging environment as efficient as possible.
+	
+- Find the best way of debugging intermediate results. Is the original repository written in PyTorch? Then you should be able 
+  to use a simple debugger like [ipdb](https://pypi.org/project/ipdb/) to print out intermediate values. Is the original 
+  repository written in Tensorflow 1? Then you might have to rely on tensorflow print operations like 
+  https://www.tensorflow.org/api_docs/python/tf/print to output intermediate values. Is the original repository written 
+  in Jax? Then make sure that the model is **not jitted** when running the forward pass, 
+  *e.g.* check-out [this link](https://github.com/google/jax/issues/196).
+- Use the smallest pre-trained checkpoint you can find. The smaller the checkpoint, the faster your debug cycle becomes. It is not efficient
+  if your pre-trained model is so big that your forward pass takes more than 10 seconds. In case only very large checkpoints 
+  are available, it might make more sense to create a dummy model in the new environment with randomly initialized weights 
+  and save those weights for comparision with the 🤗Transformers version of your model
+- Make sure you are using the easiest way of calling a forward pass in the original repository. Ideally, you want to find the function
+  in the original repository that **only** calls a single forward pass, *i.e.* that is often called `predict`, `evaluate`, `forward` or `__call__`. 
+  You don't want to debug a function that calls `forward` multiple times, *e.g.* to generate text, like `autoregressive_sample`, `generate`.
+- Try to separate the tokenization from the model's `forward` pass. If the original repository shows examples where you have to input a string, then 
+  try to find out where in the forward call the string input is changed to input ids and start from this point. This might mean that you have to possible 
+  write a small script yourself or change the original code so that you can directly input the ids instead of an input string.
+- Make sure that the model in your debugging setup is **not** in training mode, which often causes the model to yield random outputs due to 
+  multiple dropout layers in the model. Make sure that the forward pass in your debugging environment is **deterministic** so that the dropout layers
+  are not used.
+	
+The following section gives you more specific details/tips on how you can do this for <name of model>.
+	
+### More details on how to create a debugging environment for <name of model> 
+	
+<Here you should add very specific information on what the student should do>
+<to set up an efficient environment for the special requirements of this model>
+
+## Implement <name of model> into 🤗Transformers
+	
+Next, you should write the code 
+
 
 ## Adding a new dataset
 
