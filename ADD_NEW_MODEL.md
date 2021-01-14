@@ -35,7 +35,7 @@ To begin with, you should start by getter a good understanding of the model.
   
   - What time of model is <name of model>? BERT-like encoder-only model? GPT2-like decoder-only model? BART-like encoder-decoder model?
   - What are the applications of <name of model>? Text classification? Text generation? Seq2Seq tasks, *e.g.* summarization?
-  - What is the novel feature of the model making it different to BERT, RoBERTa, or BART?
+  - What is the novel feature of the model making it different to BERT or BART (if it's an encoder-decoder model)?
   - Which of the already existing [🤗Transformers models](https://huggingface.co/transformers/#contents) is most similar to <name of model>?
   
  After you feel like you have gotten a good overview over the architecture of the model, you might want 
@@ -191,293 +191,124 @@ The following section gives you more specific details/tips on how you can do thi
 
 ## Implement <name of model> into 🤗Transformers
 	
-Next, you should write the code 
+Next, you can finally add code to 🤗Transformers. Go into the clone 
+of your 🤗Transformers' fork:
 
-
-## Adding a new dataset
-
-### Understand the structure of the dataset
-
-1. Find a short-name for the dataset:
-
-	- Select a `short name` for the dataset which is unique but not too long and is easy to guess for users, e.g. `squad`, `natural_questions`
-	- Sometimes the short-list name is already given/proposed (e.g. in the spreadsheet of the data sprint to reach v2.0 if you are participating in the effort)
-
-You are now ready to start the process of adding the dataset. We will create the following files:
-
-- a **dataset script** which contains the code to download and pre-process the dataset: e.g. `squad.py`,
-- a **dataset card** with tags and information on the dataset in a `README.md`.
-- a **metadata file** (automatically created) which contains checksums and informations about the dataset to guarantee that the loading went fine: `dataset_infos.json`
-- a **dummy-data file** (automatically created) which contains small examples from the original files to test and garantee that the script is working well in the future: `dummy_data.zip`
-
-2. Let's start by creating a new branch to hold your development changes with the name of your dataset:
-
-	```bash
-	git fetch upstream
-	git rebase upstream/master
-	git checkout -b a-descriptive-name-for-my-changes
-	```
-
-	**Do not** work on the `master` branch.
-
-3. Create your dataset folder under `datasets/<your_dataset_name>`:
-
-	```bash
-	mkdir ./datasets/<your_dataset_name>
-	```
-
-4. Open a new online [dataset card form](https://huggingface.co/datasets/card-creator/) to fill out: you will be able to download it to your dataset folder with the `Export` button when you are done. Alternatively, you can also manually create and edit a dataset card in the folder by copying the template:
-
-	```bash
-	cp ./templates/README.md ./datasets/<your_dataset_name>/README.md
-	```
-
-5. Now explore the dataset you have selected while completing some fields of the **dataset card** while you are doing it:
-
-	- Find the research paper or description presenting the dataset you want to add
-	- Read the relevant part of the paper/description presenting the dataset
-	- Find the location of the data for your dataset
-	- Download/open the data to see how it looks like
-	- While you explore and read about the dataset, you can complete some sections of the dataset card (the online form or the one you have just created at `./datasets/<your_dataset_name>/README.md`). You can just copy the information you meet in your readings in the relevant sections of the dataset card (typically in `Dataset Description`, `Dataset Structure` and `Dataset Creation`).
-
-		If you need more information on a section of the dataset card, a detailed guide is in the `README_guide.md` here: https://github.com/huggingface/datasets/blob/master/templates/README_guide.md.
-
-		There is a also a (very detailed) example here: https://github.com/huggingface/datasets/tree/master/datasets/eli5.
-
-		Don't spend too much time completing the dataset card, just copy what you find when exploring the dataset documentation. If you can't find all the information it's ok. You can always spend more time completing the dataset card while we are reviewing your PR (see below) and the dataset card will be open for everybody to complete them afterwards. If you don't know what to write in a section, just leave the `[More Information Needed]` text.
-
-
-### Write the loading/processing code
-
-Now let's get coding :-)
-
-The dataset script is the main entry point to load and process the data. It is a python script under `datasets/<your_dataset_name>/<your_dataset_name>.py`.
-
-There is a detailed explanation on how the library and scripts are organized [here](https://huggingface.co/docs/datasets/add_dataset.html).
-
-Note on naming: the dataset class should be camel case, while the dataset short_name is its snake case equivalent (ex: `class BookCorpus` for the dataset `book_corpus`).
-
-To add a new dataset, you can start from the empty template which is [in the `templates` folder](https://github.com/huggingface/datasets/blob/master/templates/new_dataset_script.py):
-
-```bash
-cp ./templates/new_dataset_script.py ./datasets/<your_dataset_name>/<your_dataset_name>.py
+```
+cd transformers
 ```
 
-And then go progressively through all the `TODO` in the template 🙂. If it's your first dataset addition and you are a bit lost among the information to fill in, you can take some time to read the [detailed explanation here](https://huggingface.co/docs/datasets/add_dataset.html).
+### Use the Cookiecutter to automatically generate the model's code
 
-You can also start (or copy any part) from one of the datasets of reference listed below. The main criteria for choosing among these reference dataset is the format of the data files (JSON/JSONL/CSV/TSV/text) and whether you need or don't need several configurations (see above explanations on configurations). Feel free to reuse any parts of the following examples and adapt them to your case:
+To begin with head over to 
+the [🤗Transformers templates](https://github.com/huggingface/transformers/tree/master/templates/adding_a_new_model) to make
+use of our `cookiecutter` implementation to automatically generate all the relevant 
+files for your model. Again, we recommend to only add the PyTorch version of the model at first.
+Make sure you follow the instructions of the `README.md` on the [🤗Transformers templates](https://github.com/huggingface/transformers/tree/master/templates/adding_a_new_model) carefully.
 
-- question-answering: [squad](https://github.com/huggingface/datasets/blob/master/datasets/squad/squad.py) (original data are in json)
-- natural language inference: [snli](https://github.com/huggingface/datasets/blob/master/datasets/snli/snli.py) (original data are in text files with tab separated columns)
-- POS/NER: [conll2003](https://github.com/huggingface/datasets/blob/master/datasets/conll2003/conll2003.py) (original data are in text files with one token per line)
-- sentiment analysis: [allocine](https://github.com/huggingface/datasets/blob/master/datasets/allocine/allocine.py) (original data are in jsonl files)
-- text classification: [ag_news](https://github.com/huggingface/datasets/blob/master/datasets/ag_news/ag_news.py) (original data are in csv files)
-- translation: [flores](https://github.com/huggingface/datasets/blob/master/datasets/flores/flores.py) (original data come from text files - one per language)
-- summarization: [billsum](https://github.com/huggingface/datasets/blob/master/datasets/billsum/billsum.py) (original data are in json files)
-- benchmark: [glue](https://github.com/huggingface/datasets/blob/master/datasets/glue/glue.py) (original data are various formats)
-- multilingual: [xquad](https://github.com/huggingface/datasets/blob/master/datasets/xquad/xquad.py) (original data are in json)
-- multitask: [matinf](https://github.com/huggingface/datasets/blob/master/datasets/matinf/matinf.py) (original data need to be downloaded by the user because it requires authentificaition)
+### Adapt the generated model's code for <name of model>
+	
+At first we will focus only on the model itself and not care about the tokenizer. All the relevant code should be found in 
+the generated files `src/transformers/models/<lowercase name of model>/modeling_<lowercase name of model>.py`
+and `src/transformers/models/<lowercase name of model>/configuration_<lowercase name of model>.py`.
 
-While you are developping the dataset script you can list test it by opening a python interpreter and running the script (the script is dynamically updated each time you modify it):
+Now you can finally start coding :). The generated code in `src/transformers/models/<lowercase name of model>/modeling_<lowercase name of model>.py` will
+either have the same architecture as BERT or BART if it's an encoder-decoder model.
+At this point, you should remind yourself what you've learned in the beginning about the theoretical aspects of the model: *How is the model different from BERT or BART?*". Implement those changes which often means to change the *self-attention* layer, the order of the normalization layer, etc...
+Here it is often useful to look at similar architecture of already existing models in Transformers.
+
+**Note** that at this point, you don't have to be very sure that your code is fully correct or clean.
+Rather, it is advised to add a first *unclean*, copy-pasted version of the original code to 
+`src/transformers/models/<lowercase name of model>/modeling_<lowercase name of model>.py` until you feel like all the 
+necessary code is added. From our experience, it is much more efficient to quickly add a first version of the required code
+and improve/correct the code iteratively with the conversion script as descriped in the next section. The only thing that has to work at this 
+point is that you can instantiate the 🤗Transformers implementation of <name of model>, *i.e.* the following command works:
+	
+```python 
+from transformers import <camelcase name of model>Model, <camelcase name of model>Config
+
+model = <camelcase name of model>Model(<camelcase name of model>Config())
+```
+
+The above command will create a model according to the default parameters as defined in `<camelcase name of model>Config()`
+with random weights, thus making sure that the `init()` methods of all components works.
+
+In the case of <name of model>, you should at least have to do the following changes:
+	
+<Here you should add very specific information on what exactly has to be changed for this model>
+<...>
+<...>
+
+### Write a conversion script
+
+Now, you should write a conversion script that let's you convert the checkpoint you used to debug 
+<name of model> in the original repository to your just created 🤗Transformers implementation of <name of model>.
+Here you should not try to write the conversion script from scratch, but find similar models in 🤗Transformers
+that require similar conversion scripts, *i.e.* whose original repository was written with the same framework as
+<name of model>.
+	
+In the conversion script, you should make sure that you set the parameters correctly in `<camelcase name of model>Config()`
+to exactly match those that were used for the checkpoint you want to convert. Also it is very important that before
+you set the retrieved weights to the new weight, *e.g.* via
+```python
+layer.weight.data = array
+```
+you make sure that both their **shape and name matches**. If either the shape or the name doesn't match, you probably assigned the wrong 
+checkpoint weight to a randomely initialized layer of the 🤗Transformers implementation. Therefore, it is **absolutely necessary** to
+add assert statements for the shape and print out the names of the checkpoints weights. E.g. you should add statements like:
 
 ```python
-from datasets import load_dataset
-
-data = load_dataset('./datasets/<your_dataset_name>')
+assert (
+	pointer_random_weight.shape == checkpoint_weight.shape
+), f"Pointer shape of random weight {pointer_random_weight.shape} and array shape of checkpoint weight {checkpoint_weight.shape} mismatched
 ```
 
-This let you for instance use `print()` statements inside the script as well as seeing directly errors and the final dataset format.
+and 
 
-**What are configurations and splits**
-
-Sometimes you need to use several *configurations* and/or *splits* (usually at least splits will be defined).
-
-* Using several **configurations** allow to have like sub-datasets inside a dataset and are needed in two main cases:
-
-	- The dataset covers or group several sub-datasets or domains that the users may want to access independantly and/or
-	- The dataset comprise several sub-part with different features/organizations of the data (e.g. two types of CSV files with different types of columns). Inside a configuration of a dataset, all the data should have the same format (columns) but the columns can change accross configurations.
-
-* **Splits** are a more fine grained division than configurations. They allow you, inside a configuration of the dataset, to split the data in typically train/validation/test splits. All the splits inside a configuration should have the same columns/features and splits are thus defined for each specific configurations of there are several.
-
-
-**Some rules to follow when adding the dataset**:
-
-- try to give access to all the data, columns, features and information in the dataset. If the dataset contains various sub-parts with differing formats, create several configurations to give access to all of them.
-- datasets in the `datasets` library are typed. Take some time to carefully think about the `features` (see an introduction [here](https://huggingface.co/docs/datasets/exploring.html#features-and-columns) and the full list of possible features [here](https://huggingface.co/docs/datasets/features.html))
-- if some of you dataset features are in a fixed set of classes (e.g. labels), you should use a `ClassLabel` feature.
-
-
-**Last step:** To check that your dataset works correctly and to create its `dataset_infos.json` file run the command:
-
-```bash
-python datasets-cli test datasets/<your-dataset-folder> --save_infos --all_configs
+```python
+logger.info(f"Initialize PyTorch weight {pointer_random_weight.name} from {checkpoint_weight.name}")
 ```
 
-**Note:** If your dataset requires manually downloading the data and having the user provide the path to the dataset you can run the following command:
-```bash
-python datasets-cli test datasets/<your-dataset-folder> --save_infos --all_configs --data_dir your/manual/dir
-```
-To have the configs use the path from `--data_dir` when generating them.
+for verification. In addition, you should also check that **all** required weights are initialized and print
+out all checkpoint weights that were not used for initialization to make sure the model is correctly converted.
+It is completely normal, that the conversion trials fail with either a wrong shape statement or wrong name assignment.
+This is most likely because either you used incorrect parameters in `<camelcase name of model>Config()`, have a wrong architecture 
+in the the 🤗Transformers implementation, you have a bug in the `init()` functions of one the components of 
+the 🤗Transformers implementation or you need to transpose one of the checkpoint weights.
 
-### Automatically add code metadata
+This step should be iterated with the previous step until all weights of the chekpoint are correctly loaded in the Transformers model.
 
-Now that your dataset script runs and create a dataset with the format you expected, you can add the JSON metadata and test data.
+In the case of <name of model>, you should probably do the following:
+	
+<Here you should add very specific information on what exactly has to be done for the conversion of this model>
+<...>
+<...>
+	
+### Implement the forward pass
 
-**Make sure you run all of the following commands from the root of your `datasets` git clone.**
+TODO: PVP
 
-1. To create the dummy data for continuous testing, there is a tool that automatically generates dummy data for you. At the moment it supports data files in the following format: txt, csv, tsv, jsonl, json, xml.
-If the extensions of the raw data files of your dataset are in this list, then you can automatically generate your dummy data with:
+### Implement the tokenizer
 
-	```bash
- 	python datasets-cli dummy_data datasets/<your-dataset-folder> --auto_generate
-	```
+TODO: PVP
 
-	Example:
+### Adding all necessary tests
 
-	```bash
- 	python datasets-cli dummy_data ./datasets/snli --auto_generate
-	```
+TODO: PVP
 
-	If this doesn't work more information on how to add dummy data can be found in the documentation [here](https://huggingface.co/docs/datasets/share_dataset.html#adding-dummy-data).
+### Refactor the added code
 
-If you've been fighting with dummy data creation without success for some time and can't seems to make it work:
-Go to the next step (open a Pull Request) and we'll help you cross the finish line 🙂
-
-2. Now test that both the real data and the dummy data work correctly using the following commands:
-
-	*For the real data*:
-	```bash
-	RUN_SLOW=1 pytest tests/test_dataset_common.py::LocalDatasetTest::test_load_real_dataset_<your-dataset-name>
-	```
-	and
-
-	*For the dummy data*:
-	```bash
-	RUN_SLOW=1 pytest tests/test_dataset_common.py::LocalDatasetTest::test_load_dataset_all_configs_<your-dataset-name>
-	```
-
-	On **Windows**, you may need to run:
-	```
-	$Env:RUN_SLOW = "1"
-	pytest tests/test_dataset_common.py::LocalDatasetTest::test_load_real_dataset_<your-dataset-name>
-	pytest tests/test_dataset_common.py::LocalDatasetTest::test_load_dataset_all_configs_<your-dataset-name>
-	```
-	to enable the slow tests, instead of `RUN_SLOW=1`.
-
-3. If all tests pass, your dataset works correctly. You can finally create the metadata JSON by running the command:
-
-	```bash
-	python datasets-cli test datasets/<your-dataset-folder> --save_infos --all_configs
-	```
-
-	This first command should create a `dataset_infos.json` file in your dataset folder.
-
+TODO: PVP
 
 You have now finished the coding part, congratulation! 🎉 You are Awesome! 😎
 
-### Open a Pull Request on the main HuggingFace repo and share your work!!
+## Open a Pull Request on the main huggingface/transformers repo
 
-Here are the step to open the Pull-Request on the main repo.
+TODO: PVP
 
-1. Format your code. Run black, isort and flake8 so that your newly added files look nice with the following commands:
+## Share your work!!
 
-	```bash
-	make style
-	flake8 datasets
-	```
-
-	If you are on windows and `make style` doesn't work you can do the following steps instead:
-
-	```bash
-	pip install black
-	pip install isort
-	pip install flake8
-
-	black --line-length 119 --target-version py36 datasets/your_dataset
-	
-	isort datasets/your_dataset/your_dataset.py
-
-	flake8 datasets/your_dataset
-	```
-
-2. Make sure that you have a dataset card (more information in the [next section](#tag-the-dataset-and-write-the-dataset-card)) with:
-
-	1. **Required:** The YAML tags obtained with the [tagging app](https://github.com/huggingface/datasets-tagging) and a description of the various fields in your dataset.
-	2. Any relevant information you would like to share with users of your dataset in the appropriate paragraphs.
-
-3. Once you're happy with your dataset script file, add your changes and make a commit to record your changes locally:
-
-	```bash
-	git add datasets/<your_dataset_name>
-	git commit
-	```
-
-	It is a good idea to sync your copy of the code with the original
-	repository regularly. This way you can quickly account for changes:
-	
-	- If you haven't pushed your branch yet, you can rebase on upstream/master:
-
-	  ```bash
-	  git fetch upstream
-	  git rebase upstream/master
-	  ```
-	  
-	- If you have already pushed your branch, do not rebase but merge instead:
-	
-	  ```bash
-	  git fetch upstream
-	  git merge upstream/master
-	  ```
-
-   Push the changes to your account using:
-
-   ```bash
-   git push -u origin a-descriptive-name-for-my-changes
-   ```
-
-3. Once you are satisfied, go the webpage of your fork on GitHub. Click on "Pull request" to send your to the project maintainers for review.
-
-Congratulation you have open a PR to add a new dataset 🙏
-
-**Important note:** In order to merge your Pull Request the maintainers will require you to tag and add a dataset card. Here is now how to do this last step:
-
-### Tag the dataset and write the dataset card
-
-Each dataset is provided with a dataset card.
-
-The dataset card and in particular the tags which are on it are **really important** to make sure the dataset can be found on the hub and will be used by the users. Users need to have the best possible idea of what's inside the dataset and how it was created so that they can use it safely and have a good idea of the content.
-
-Creating the dataset card goes in two steps:
-
-1. **Tagging the dataset using the tagging streamlit app**
-
-	Clone locally the dataset-tagging app which is here: https://github.com/huggingface/datasets-tagging
-
-	Run the app with the command detailed in the readme: https://github.com/huggingface/datasets-tagging/blob/main/README.md
-
-	Enter the full path to your dataset folder on the left, and tag the different configs :-) (And don't forget to save to file after you're done with a config!)
-
-2. **Copy the tags in the dataset card and complete the dataset card**
-
-	- **Essential:** Once you have saved the tags for all configs, you can expand the **Show YAML output aggregating the tags** section on the right, which will show you a YAML formatted block to put in the relevant section of the [online form](https://huggingface.co/datasets/card-creator/) (or manually  paste into your README.md).
-
-	- **Very important as well:** On the right side of the tagging app, you will also find an expandable section called **Show Markdown Data Fields**. This gives you a starting point for the description of the fields in your dataset: you should paste it into the **Data Fields** section of the [online form](https://huggingface.co/datasets/card-creator/) (or your local README.md), then modify the description as needed. Briefly describe each of the fields and indicate if they have a default value (e.g. when there is no label). If the data has span indices, describe their attributes (character level or word level, contiguous or not, etc). If the datasets contains example IDs, state whether they have an inherent meaning, such as a mapping to other datasets or pointing to relationships between data points.
-
-		Example from the [ELI5 card](https://github.com/huggingface/datasets/tree/master/datasets/eli5#data-fields):
-
-			Data Fields:
-				- q_id: a string question identifier for each example, corresponding to its ID in the Pushshift.io Reddit submission dumps.
-				- subreddit: One of explainlikeimfive, askscience, or AskHistorians, indicating which subreddit the question came from
-				- title: title of the question, with URLs extracted and replaced by URL_n tokens
-				- title_urls: list of the extracted URLs, the nth element of the list was replaced by URL_n
+TODO: PVP
 
 
-	- **Very nice to have but optional for now:** Complete all you can find in the dataset card using the detailed instructions for completed it which are in the `README_guide.md` here: https://github.com/huggingface/datasets/blob/master/templates/README_guide.md.
-
-		Here is a completed example: https://github.com/huggingface/datasets/tree/master/datasets/eli5 for inspiration
-
-		If you don't know what to write in a field and can find it, write: `[More Information Needed]`
-
-If you are using the online form, you can then click the `Export` button at the top to download a `README.md` file to your data folder. Once your `README.md` is ok you have finished all the steps to add your dataset, congratulation your Pull Request can be merged.
-
-**You have made another dataset super easy to access for everyone in the community! 🤯**
+**You have made another model that is super easy to access for everyone in the community! 🤯**
