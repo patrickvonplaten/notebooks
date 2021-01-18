@@ -37,6 +37,7 @@ To begin with, you should start by getting a good understanding of the model.
   - What are the applications of [name of model]? Text classification? Text generation? Seq2Seq tasks, *e.g.* summarization?
   - What is the novel feature of the model making it different to BERT or BART (if it's an encoder-decoder model)?
   - Which of the already existing [🤗Transformers models](https://huggingface.co/transformers/#contents) is most similar to [name of model]?
+  - What type of tokenizer is used? A sentence piece tokenizer? Word piece tokenizer? Is it the same tokenizer as used for BERT or BART?
   
  After you feel like you have gotten a good overview over the architecture of the model, you might want 
  to ping [name of hugging face teacher] for any questions you might have.
@@ -105,7 +106,7 @@ This creates a copy of the code under your GitHub user account.
 
 Now you have set up a development environment to port [name of model] to 🤗Transformers.
   
-## Run a pre-trained checkpoint using the original repository
+## Run a pretrained checkpoint using the original repository
 
 At first, you will work the original repository. Often, the original implementation is very
  "researchy" meaning that documentation might be lacking and the code can be hard to read / understand.
@@ -140,13 +141,14 @@ token ids, *i.e.* `input_ids = [0, 1, 4, 5, ...]` to the model's forward functio
 intermediate outputs of - let's say - the first self-attention layer that could look something like this: 
 
 ```bash
-[[[-0.1465, -0.6501,  0.1993,  ...,  0.1451,  0.3430,  0.6024],
-         [-0.4417, -0.5920,  0.3450,  ..., -0.3062,  0.6182,  0.7132],
-         [-0.5009, -0.7122,  0.4548,  ..., -0.3662,  0.6091,  0.7648],
-         ...,
-         [-0.5613, -0.6332,  0.4324,  ..., -0.3792,  0.7372,  0.9288],
-         [-0.5416, -0.6345,  0.4180,  ..., -0.3564,  0.6992,  0.9191],
-         [-0.5334, -0.6403,  0.4271,  ..., -0.3339,  0.6533,  0.8694]]],
+[[
+ [-0.1465, -0.6501,  0.1993,  ...,  0.1451,  0.3430,  0.6024],
+ [-0.4417, -0.5920,  0.3450,  ..., -0.3062,  0.6182,  0.7132],
+ [-0.5009, -0.7122,  0.4548,  ..., -0.3662,  0.6091,  0.7648],
+ ...,
+ [-0.5613, -0.6332,  0.4324,  ..., -0.3792,  0.7372,  0.9288],
+ [-0.5416, -0.6345,  0.4180,  ..., -0.3564,  0.6992,  0.9191],
+ [-0.5334, -0.6403,  0.4271,  ..., -0.3339,  0.6533,  0.8694]]],
 ```
 
 This means that your debugging environment should consists of a short script (ideally written by you) that 
@@ -192,7 +194,7 @@ The following section gives you more specific details/tips on how you can do thi
 	
 ### More details on how to create a debugging environment for [name of model] 
 	
-[Here you should add very specific information on what the student should do]
+[Here the teacher should add very specific information on what the student should do]
 [to set up an efficient environment for the special requirements of this model]
 
 ## Implement [name of model] into 🤗Transformers
@@ -211,6 +213,54 @@ the [🤗Transformers templates](https://github.com/huggingface/transformers/tre
 use of our `cookiecutter` implementation to automatically generate all the relevant 
 files for your model. Again, we recommend to only add the PyTorch version of the model at first.
 Make sure you follow the instructions of the `README.md` on the [🤗Transformers templates](https://github.com/huggingface/transformers/tree/master/templates/adding_a_new_model) carefully.
+
+### Open a Pull Request on the main huggingface/transformers repo
+
+Before starting to adapt the automatically generated code, now is the time to open a "Work in progress (WIP)" pull request, *e.g.* "[WIP] Add [name of model]",
+in 🤗Transformers so that you and [name of teacher] can work side-by-side on integrating the model into 🤗Transformers.
+
+You should do the following:
+
+1. Commit the automatically generated code:
+
+```
+git add .
+git commit
+```
+
+2. Fetch and rebase to current master
+
+```
+git fetch upstream
+git rebase upstream/master
+```
+
+3. Push the changes to your account using:
+
+```
+git push -u origin a-descriptive-name-for-my-changes
+```
+
+4. Once you are satisfied, go the webpage of your fork on GitHub. Click on "Pull request". Make sure to add the github handle of [name of teacher] as 
+reviewer, so that [name of teacher] gets notified for future changes.
+
+5. Change the PR into a draft by clicking on "Convert to draft" on the right of the github pull request web page.
+
+In the following, whenever you have done some progress, don't forget to commit your work and push it to your account so that is shows in the pull request. 
+Additionally, you should make sure to update your work with the current master from time to time by doing:
+
+```
+git fetch upstream
+git merge upstream/master
+```
+
+In general, all questions you might have regarding the model or your implementation should be asked in your PR and discussed/solved in the PR.
+This way, [name of teacher] will always be pinged when you commiting new code or if you have a question. It is often very helpful to point [name of teacher] to your added code so that [name of teacher] can efficiently understand your problem or question.
+
+To do so, you can go to the "Files changed" tab where you see all of your changes, go to a line regarding which you want to ask a question, and click on the "+" symbol to add a comment. Whenever, a question or problem has been solved, you can click on the "Resolve" button of the created comment.
+
+The same way, [name of teacher] will open comments when reviewing your code. We recommend to ask most questions on GitHub on your PR. For some very general
+questions which are not very useful for the public, feel free to ping [name of teacher] by Slack or mail.
 
 ### Adapt the generated model's code for [name of model]
 	
@@ -241,7 +291,7 @@ with random weights, thus making sure that the `init()` methods of all component
 
 In the case of [name of model], you should at least have to do the following changes:
 	
-[Here you should add very specific information on what exactly has to be changed for this model]
+[Here the teacher should add very specific information on what exactly has to be changed for this model]
 [...]
 [...]
 
@@ -288,7 +338,7 @@ Having correctly loaded the checkpoint into the 🤗Transformers implementation,
 
 In the case of [name of model], you should probably do the following:
 	
-[Here you should add very specific information on what exactly has to be done for the conversion of this model]
+[Here the teacher should add very specific information on what exactly has to be done for the conversion of this model]
 [...]
 [...]
 	
@@ -332,31 +382,152 @@ should point you to the bug in the 🤗Transformers implementation. From our exp
 original implementation and 🤗Transformers implementation, at the same positions in the network respectively, and to succesively remove print statements showing
 the same values for intermediate presentions.
 
-When you're confident that both implementations yield the same output, verifying the outputs with `torch.allclose(original_output, output, atol=1e-3)`, you're done with the most difficult part! Congratulations - the leftover work to be done should be a cake walk 😊.
+When you're confident that both implementations yield the same output, verifying the outputs with `torch.allclose(original_output, output, atol=1e-3)`, you're done with the most difficult part! Congratulations - the work left to be done should be a cake walk 😊.
   
 ### Adding all necessary model tests
 
+At this point you have succesfully added a new model. However, it is very much possible that the model does not yet fully comply with the required 
+design. To make sure, the implementation is fully compatible with 🤗Transformers, all common tests should pass. The Cookiecutter should have automatically 
+added a test file for your model, probably under the same `tests/test_modeling_[name of model].py`. Run this test file to verify that all common tests pass:
 
+```python
+pytest tests/test_modeling_[name of model].py
+```
 
-### Refactor the added code
+[Here the teacher should add very specific information on what tests are likely to fail after having implemented the model
+, e.g. given the model, it might be very likely that `test_attention_output` fails]
+[...]
+[...]
 
-TODO: PVP
+Having fixed all common tests, it is now crucial to ensure that all the nice work you have done is well tested, so that 
 
+- a) The community can easily understand your work by looking at specific tests of [name of model]
+- b) Future changes to your model will not break any important feature of the model.
+
+At first, integration tests should be added. Those integration tests essentially do the same as the debugging scripts you used 
+earlier to implement the model to 🤗Transformers. A template of those model tests is already added by the Cookiecutter, called 
+`[camelcase name of model]ModelIntegrationTests` and only has to be filled-out by you. To ensure that those tests are passing, 
+run 
+
+```python
+RUN_SLOW=1 pytest tests/test_modeling_[name of model].py::[camelcase name of model]ModelIntegrationTests
+```
+
+Second, all features that are special to [name of model] should be tested additionally in a separate test under `[camelcase name of model]ModelTester`/`[camelcase name of model]ModelTest`. This part is often forgotten, but is actually extremely useful in two ways:
+
+- It helps to transfer knowledge you have aquired during the model addition to the community by showing how the special feature of [name of model] should work
+- Future contributors can quickly test changes to the model by running those special tests
+
+[Here the teacher should add very specific information on what special features of the model should be tested additionally]
+[...]
+[...]
 
 ### Implement the tokenizer
 
-TODO: PVP
+Next, we should add the tokenizer of [name of model]. Usually, the tokenizer is equivalent or very similar to an already existing tokenizer of 
+🤗Transformers. 
 
+[Here the teacher should add a comment whether a new tokenizer is required or if this is not the case which existing tokenizer closest resembles 
+ [name of model]'s tokenizer and how the tokenizer should be implemented]
+ [...]
+ [...]
+ 
+ Next, it is very important to find/extract the original tokenizer file and to manage to load this file into the 🤗Transformers' implementation 
+ of the tokenizer.
+
+For [name of model], the tokenizer files can be found here:
+- [To be filled out by teacher]
+
+and having implemented the the 🤗Transformers' version of the tokenizer can be loaded as follows:
+
+[To be filled out by teacher]
+ 
+ To ensure that the tokenizer works correctly, it is recommend to analogous to the model, first create a script in the original repository that 
+ inputs a string and returns the `input_ids`. It could look similar to this (in pseudo code):
+ 
+ ```bash
+ input_str = "This is a long example input string containing special characters .$?-, numbers 2872 234 12 and words."
+ model = [name of model]Model.load_pretrained_checkpoint(/path/to/checkpoint/)
+ input_ids = model.tokenize(input_str)
+ ```
+ 
+ Again, you might have to take a deeper look again into the original repository to find the correct tokenizer function or you might even have to do 
+ changes to your clone of the original repository to only output the `input_ids`. Having written a functional tokenization script that uses the original repository, an analogous script for 🤗Transfromers should be created. It should look similar to this:
+ 
+ ```python
+ from transformers import [camelcase name of model]Tokenizer
+ input_str = "This is a long example input string containing special characters .$?-, numbers 2872 234 12 and words."
+ 
+ tokenizer = [camelcase name of model]Tokenizer.from_pretrained(/path/to/tokenizer/folder/)
+ 
+ input_ids = tokenizer(input_str).input_ids
+ ```
+ 
+ When both `input_ids` yield the same values, as a final step a tokenizer test file should also be added. 
+ 
+ [Here teacher should write how to do so. Tokenizer test files strongly vary between different model implementations]
+ 
+ Analogous to the modeling test files of [name of model], the tokenization test files of [name of model] should 
+ contain a couple of hard-coded integration tests.
+ 
+ [Here teacher should point the student to test files of similar tokenizers]
+ 
+ As a final step, it is recommend to add one large integration tests to `tests/test_modeling_[name of model].py` that does some end-to-end
+ testing using both the model and the tokenizer.
+ 
+ [Here teacher should again point to an existing similar test of another model that the student can copy & adapt]
+
+### Add Docstring
+
+Now, all the necessary functionality for [name of model] is added - you're almost done! The only thing left to add 
+are some nice docstrings and a doc page. The Cookiecutter should have added a template file called `docs/source/model_doc/[name of model].rst`
+that you should fill out. Users of your model will usually first look at this page before using your model. Hence, it is very important 
+that the documentation is understandable and concise. It is very useful to the community to add some *Tips* for how the model show be used.
+Don't hesitate to ping [name of teacher] regarding the docstrings.
+
+Next, make sure that the docstring added to `src/transformers/models/[name of model]/modeling_[name of model].py` is correct and included all necessary
+inputs and outputs. It is always to good to remind oneself that documentation shoud be treated at least as carefully as the code in 🤗Transformers since the 
+documentation is usually the first contact point of the community with the model.
+
+### Code refactor
+
+Great, now you have added all the necessary code for [name of model]. 
+At this point, you should correct some potentional incorrect code style by running:
+
+```bash
+make style
+```
+
+and verify that you coding style passes the quality check:
+
+```bash
+make quality
+```
+
+There are a couple of other very strict design tests in 🤗Transformers that might still be failing, 
+which shows up in the tests of your pull request. This is often because of some missing information in the 
+docstring or some incorrect naming. [name of teacher] will surely help you if you're stuck here.
+
+Lastly, it is always a good idea to refactor one's code after having ensured that the code works correctly. 
+With all tests passing, now it's a good time to go over the added code again and do some refactoring.
 
 You have now finished the coding part, congratulation! 🎉 You are Awesome! 😎
 
-## Open a Pull Request on the main huggingface/transformers repo
+### Upload the models to the modeling hub
 
-TODO: PVP
+In this final part you should convert and upload all checkpoints to the model hub and add a model card for 
+each uploaded model checkpoint. You should work along side [name of teacher] here to decide on a fitting name 
+for each checkpoint and to get the required access rights to be able to upload the model under the author's organization
+of [name of model].
+
+It is worth spending some time to create fitting model cards for each checkpoint. The model cards should highlight the specific characteristics
+of this particular checkpoint, *e.g.* On which dataset was the checkpoint pretrained/fine-tuned on? On what down-stream task should the model 
+be used? and also include some code on how to correctly use the model. 
 
 ## Share your work!!
 
-TODO: PVP
-
+Now, it's time to get some credit from the community for your work! Having completed a model addition is a major contribution 
+to Transformers and to the whole NLP community. Your code will certainly be used by hundreds of developpers and reseachers. You should 
+be proud of your work and share your achievement with the community.
 
 **You have made another model that is super easy to access for everyone in the community! 🤯**
