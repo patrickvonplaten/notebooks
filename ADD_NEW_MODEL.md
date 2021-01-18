@@ -18,10 +18,26 @@ you will:
 - learn how to do efficiently test large NLP models,
 - learn how to integrate python utilities like `black`, `isort`, `make fix-copies` into a library 
   to always ensure clean and readable code.
+  
+The following list is a summary of everything that has to be done to add a model and can be used 
+by you as a To-Do List:
+
+- [ ] Understood theoretical aspects
+- [ ] Prepared environment
+- [ ] Set up debugging environment of original repository
+- [ ] Created script that succesfully runs forward pass using original repository and checkpoint
+- [ ] Successfully converted original checkpoint to Transformers checkpoint
+- [ ] Successfully ran forward pass in Transformers that gives identical output to original checkpoint
+- [ ] Finished model tests in Transformers
+- [ ] Succesfully added Tokenizer in Transformers
+- [ ] Finished docs
+- [ ] Uploaded model weights to the hub
+- [ ] Merged the pull request
+- [ ] (Optionally) added a notebook
 
 To begin with, you should start by getting a good understanding of the model.
   
-## Theoritacl aspects of [name of model]
+## Theoretical aspects of [name of model]
   
 ### Paper
 
@@ -523,6 +539,11 @@ of [name of model].
 It is worth spending some time to create fitting model cards for each checkpoint. The model cards should highlight the specific characteristics
 of this particular checkpoint, *e.g.* On which dataset was the checkpoint pretrained/fine-tuned on? On what down-stream task should the model 
 be used? and also include some code on how to correctly use the model. 
+
+### (Optional) Add notebook
+
+It is very helpful to add a notebook that showcases in-detail how [name of model] can be used for inference and/or fine-tuned 
+on a down-stream task. This is not mandatory to merge your PR, but very useful for the community. 
 
 ## Share your work!!
 
