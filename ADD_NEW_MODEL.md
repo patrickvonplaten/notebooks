@@ -19,7 +19,7 @@ you will:
 - learn how to integrate python utilities like `black`, `isort`, `make fix-copies` into a library 
   to always ensure clean and readable code.
 
-To begin with, you should start by getter a good understanding of the model.
+To begin with, you should start by getting a good understanding of the model.
   
 ## Theoritacl aspects of [name of model]
   
@@ -140,7 +140,13 @@ token ids, *i.e.* `input_ids = [0, 1, 4, 5, ...]` to the model's forward functio
 intermediate outputs of - let's say - the first self-attention layer that could look something like this: 
 
 ```bash
-[[[0.3427, 0.4756, ...], [-3.544, 0.3379, ...], ...], ...]
+[[[-0.1465, -0.6501,  0.1993,  ...,  0.1451,  0.3430,  0.6024],
+         [-0.4417, -0.5920,  0.3450,  ..., -0.3062,  0.6182,  0.7132],
+         [-0.5009, -0.7122,  0.4548,  ..., -0.3662,  0.6091,  0.7648],
+         ...,
+         [-0.5613, -0.6332,  0.4324,  ..., -0.3792,  0.7372,  0.9288],
+         [-0.5416, -0.6345,  0.4180,  ..., -0.3564,  0.6992,  0.9191],
+         [-0.5334, -0.6403,  0.4271,  ..., -0.3339,  0.6533,  0.8694]]],
 ```
 
 This means that your debugging environment should consists of a short script (ideally written by you) that 
@@ -149,7 +155,7 @@ does the following (in pseudocode):
 ```bash
 model = [name of model]Model.load_pretrained_checkpoint(/path/to/checkpoint/)
 input_ids = ... # vector of input ids
-outputs = model.predict(input_ids)
+original_output = model.predict(input_ids)
 ```
 
 By running such a script, you should be able to print out intermediate values or hit a break point
@@ -273,10 +279,12 @@ for verification. In addition, you should also check that **all** required weigh
 out all checkpoint weights that were not used for initialization to make sure the model is correctly converted.
 It is completely normal, that the conversion trials fail with either a wrong shape statement or wrong name assignment.
 This is most likely because either you used incorrect parameters in `[camelcase name of model]Config()`, have a wrong architecture 
-in the the 🤗Transformers implementation, you have a bug in the `init()` functions of one the components of 
+in the 🤗Transformers implementation, you have a bug in the `init()` functions of one the components of 
 the 🤗Transformers implementation or you need to transpose one of the checkpoint weights.
 
-This step should be iterated with the previous step until all weights of the chekpoint are correctly loaded in the Transformers model.
+This step should be iterated with the previous step until all weights of the checkpoint are correctly loaded in the Transformers model.
+Having correctly loaded the checkpoint into the 🤗Transformers implementation, you can then save the model under a folder of your choice `/path/to/converted/checkpoint/folder` that should include both a `pytorch_model.bin` file and a `config.json` file.
+
 
 In the case of [name of model], you should probably do the following:
 	
@@ -286,19 +294,59 @@ In the case of [name of model], you should probably do the following:
 	
 ### Implement the forward pass
 
+Having managed to correctly load the pretrained weights into the 🤗Transformers implementation, you should now make sure that 
+the forward pass is correctly implemented. In *Get familiar with the original repository.*, you have already created a script
+that runs a forward pass of the model using the original repository. Now you should write an analogous script using the 
+🤗Transformers implementation instead of the original one. It should look as follows:
+
+[Here the model name might have to be adapted, *e.g.* maby [name of model]ForConditionalGeneration instead of [name of model]Model]
+
+```python
+model = [name of model]Model.from_pretrained(/path/to/converted/checkpoint/folder)
+input_ids = ... # the exact same vector of input ids in PyTorch as those used in the *Get familiar with the original repository.* section
+output = model(input_ids).last_hidden_states
+```
+
+It is very likely that the 🤗Transformers implementation and the original model implementation don't give the exact same output the very first time 
+or that the forward pass throws an error. Don't be disappointed - it's totally expected! First, you should make sure that the forward pass doesn't 
+throw any errors. It often happens that the wrong dimensionens are used leading to a `Dimensionality mismatch` error or that the wrong data type object is used,
+*e.g.* `torch.long` instead of `torch.float32`. Don't hesitate to ask [name of teacher] for help, if you don't manage to solve certain errors.
+
+The final part to make sure the 🤗Transformers implementation works correctly, is to ensure that the outputs are equivalent to a precision of `1e-3`.
+First, you should ensure that the output shapes are identical, *i.e.* `outputs.shape` should yield the same value for the script of 
+the 🤗Transformers implementation and the original implementation. Next, you should make sure that the output values are identical as well. This one of the 
+most difficult parts of adding a new model. Common mistakes why the outputs are not identical are:
+
+- Some layers were not added, *i.e.* a `activation` layer was not added, or the residual connection was forgotten
+- The word embedding matrix was not tied
+- The wrong positional embeddings are used because the original implementation uses on offset
+- Dropout is applied during the forward pass. To fix this make sure `model.training is False` and that no dropout layer is falsely activated during the 
+  forward pass, *i.e.* pass `self.training` to [PyTorch's functional dropout](https://pytorch.org/docs/stable/nn.functional.html?highlight=dropout#torch.nn.functional.dropout)
+  
+The best way to fix the problem is usually to look at the forward pass of the original implementation and the 🤗Transformers implementation side-by-side
+and check if there are any differences. Ideally, you should debug/print out intermediate outputs of both implementations of the forward pass to find the exact 
+position in the network where the 🤗Transformers implementation shows a different output than the original implementation. First, make sure that the hard-coded
+`input_ids` in both scripts are exactly identical. Next, verify that the outputs of first transformation of the `input_ids` (usually the word embeddings)
+are identical. And then work your way up to the very last layer of the network. At some point you will notice a difference between the two implementations, which
+should point you to the bug in the 🤗Transformers implementation. From our experience, a simple and efficient way is to add many print statements in both the 
+original implementation and 🤗Transformers implementation, at the same positions in the network respectively, and to succesively remove print statements showing
+the same values for intermediate presentions.
+
+When you're confident that both implementations yield the same output, verifying the outputs with `torch.allclose(original_output, output, atol=1e-3)`, you're done with the most difficult part! Congratulations - the leftover work to be done should be a cake walk 😊.
+  
+### Adding all necessary model tests
+
+
+
+### Refactor the added code
+
 TODO: PVP
+
 
 ### Implement the tokenizer
 
 TODO: PVP
 
-### Adding all necessary tests
-
-TODO: PVP
-
-### Refactor the added code
-
-TODO: PVP
 
 You have now finished the coding part, congratulation! 🎉 You are Awesome! 😎
 
