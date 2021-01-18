@@ -1,10 +1,15 @@
 # *TEMPLATE*
 
-*replace the following*
+*search & replace the following keywords:*
+
 -[name of model]
+
 -[name of teacher]
+
 -[start date]
+
 -[end date]
+
 -[camelcase name of mode]
 
 # How to add [name of model] to 🤗Transformers
